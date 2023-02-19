@@ -64,8 +64,7 @@
         <!-- <UserDefLibs Condition="'$(ConfigShortName)'=='Debug'">"C:\Tools\Visual Leak Detector\lib\Win32"</UserDefLibs>                 -->
         <UserDefLibs Condition="'$(ConfigShortName)'=='Debug'"></UserDefLibs>
         <UserDefLibs Condition="'$(ConfigShortName)'=='Release'"></UserDefLibs>
-
-
+        
         <!-- ****************************************************************************************************************************** -->
         <!-- ****************************************************************************************************************************** -->
         <!-- The name of project Output folder. Change this name if using other name.                                                       -->

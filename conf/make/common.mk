@@ -6,7 +6,10 @@
 AREG_DEVELOP_ENV        :=
 AREG_LDFLAGS            :=
 AREG_COMPILER_OPTIONS   :=
+AREG_INCLUDES           :=
+AREG_LIB_INCLUDES       :=
 AREG_DEFINITIONS        := $(AREG_USER_DEFINES) -DUNICODE -D_UNICODE
+
 ifeq ($(AREG_BUILD_TYPE), Release)
     AREG_DEFINITIONS    += -DNDEBUG
 else
@@ -47,7 +50,7 @@ else ifeq ($(AREG_CXX_COMPILER_ID), GNU)
 
     AREG_DEFINITIONS        += -DPOSIX
     AREG_DEVELOP_ENV        := Posix
-    AREG_COMPILER_OPTIONS   := -g -pthread -Wall -Werror -MMD -fmessage-length=0 -fPIC
+    AREG_COMPILER_OPTIONS   := -g -pthread -Wall -Werror -fmessage-length=0 -fPIC
 
     ifeq ($(AREG_BUILD_TYPE), Release)
         AREG_COMPILER_OPTIONS   += -O2
@@ -110,9 +113,8 @@ else
         AREG_COMPILER_OPTIONS   += -m64
     endif
 
-    AREG_COMPILER_OPTIONS   += -pthread -Wall -c -fmessage-length=0 -MMD -std=c++17
-    AREG_LDFLAGS            += -lstdc++ -lm -lpthread -lrt
-    AREG_LDFLAGS            += $(AREG_USER_DEF_LIBS)
+    AREG_COMPILER_OPTIONS   += -pthread -Wall -fmessage-length=0 -std=c++17
+    AREG_LDFLAGS            += -lstdc++ -lm -lpthread -lrt $(AREG_USER_DEF_LIBS)
 
     OBJ_EXT         := o
     AREG_BIN_EXT    := .out
@@ -153,18 +155,24 @@ AREG_OUTPUT_LIB = $(ProjLibDir)
 AREG_OUTPUT_BIN = $(ProjBinDir)
 AREG_INCLUDES   = $(ProjIncludes)
 AREG_AR         = ar
-AREG_TOOLCHAIN  = $(AREG_CXX_COMPILER)
+AREG_TOOLCHAIN  = $(CXX)
+
+ifeq ($(AREG_BINARY),shared)
+    AREG_LIB_INCLUDES = -L $(AREG_OUTPUT_BIN) -L $(AREG_OUTPUT_LIB)
+else
+    AREG_LIB_INCLUDES = -L $(AREG_OUTPUT_LIB)
+endif
 
 AREG_EXTENSIONS_LIBS    :=
 ifneq ($(AREG_ENABLE_EXT),0)
 $(info Compile AREG with enabled extensions)
 
 	AREG_COMPILER_OPTIONS   += -DENABLE_AREG_EXTENSIONS
-	AREG_EXTENSIONS_LIBS    := -L$(AREG_OUTPUT_LIB) -lareg-extensions -lncurses
-else
-	AREG_EXTENSIONS_LIBS    := -L$(AREG_OUTPUT_LIB) -lareg-extensions
+	AREG_EXTENSIONS_LIBS    := -lncurses
+    ifneq ($(AREG_OS), Cygwin)
+        AREG_EXTENSIONS_LIBS+= -ltinfo
+    endif
 endif
-
 
 CXXFLAGS    += $(AREG_COMPILER_OPTIONS)
 LDFLAGS     += $(AREG_LDFLAGS)
